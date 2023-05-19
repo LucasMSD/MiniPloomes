@@ -31,7 +31,7 @@ namespace MiniPloomes.Repository
                         {
                             Id = Convert.ToInt32(reader["Id"]),
                             Nome = Convert.ToString(reader["Nome"]),
-                            Email = Convert.ToString(reader["UsuarioId"]),
+                            Email = Convert.ToString(reader["Email"]),
                             Created = Convert.ToDateTime(reader["Created"])
                         });
                     }
@@ -48,6 +48,8 @@ namespace MiniPloomes.Repository
 
             using (SqlCommand command = new SqlCommand(query, _connection))
             {
+                command.Parameters.Add(new SqlParameter("@Id", id));
+
                 await command.Connection.OpenAsync();
 
                 using (SqlDataReader reader = command.ExecuteReader())
@@ -59,7 +61,7 @@ namespace MiniPloomes.Repository
                     {
                         Id = Convert.ToInt32(reader["Id"]),
                         Nome = Convert.ToString(reader["Nome"]),
-                        Email = Convert.ToString(reader["UsuarioId"]),
+                        Email = Convert.ToString(reader["Email"]),
                         Created = Convert.ToDateTime(reader["Created"])
                     };
 
@@ -72,9 +74,9 @@ namespace MiniPloomes.Repository
         {
             string insert = @"
 insert into Usuario
-(Nome, Email, Created)
-output inserted.* values
-(@Nome, @Email, @Created)
+(Nome, Email, Senha, Created)
+output inserted.Id, inserted.Nome, inserted.Email values
+(@Nome, @Email, @Senha, @Created)
 ";
 
             using (SqlCommand command = new SqlCommand(insert, _connection))
@@ -82,6 +84,7 @@ output inserted.* values
                 command.Parameters.Add(new SqlParameter("@Nome", createUsuarioDto.Nome));
                 command.Parameters.Add(new SqlParameter("@Email", createUsuarioDto.Email));
                 command.Parameters.Add(new SqlParameter("@Created", DateTime.Now));
+                command.Parameters.Add(new SqlParameter("@Senha", createUsuarioDto.Senha));
 
                 await command.Connection.OpenAsync();
 
@@ -94,12 +97,60 @@ output inserted.* values
                     {
                         Id = Convert.ToInt32(reader["Id"]),
                         Nome = Convert.ToString(reader["Nome"]),
-                        Email = Convert.ToString(reader["UsuarioId"]),
-                        Created = Convert.ToDateTime(reader["Created"])
+                        Email = Convert.ToString(reader["Email"])
                     };
 
                     return usuario;
                 }
+            }
+        }
+
+        public async Task<Usuario?> FindUserByLogin(string email, string senha)
+        {
+            string query = "select * from Usuario where Email = @Email and Senha = @Senha";
+
+            using (SqlCommand command = new SqlCommand(query, _connection))
+            {
+                command.Parameters.Add(new SqlParameter("@Email", email));
+                command.Parameters.Add(new SqlParameter("@Senha", senha));
+
+                await command.Connection.OpenAsync();
+
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    Usuario usuario;
+
+                    if (!reader.HasRows)
+                    {
+                        return null;
+                    }
+
+                    reader.Read();
+                    usuario = new Usuario()
+                    {
+                        Id = Convert.ToInt32(reader["Id"]),
+                        Nome = Convert.ToString(reader["Nome"]),
+                        Email = Convert.ToString(reader["Email"])
+                    };
+
+                    return usuario;
+                }
+            }
+        }
+
+        public async Task<bool> ExistsByEmail(string email)
+        {
+            string query = "select 1 from Usuario where Email = @Email";
+
+            using (SqlCommand command = new SqlCommand(query, _connection))
+            {
+                command.Parameters.Add(new SqlParameter("@Email", email));
+
+                await command.Connection.OpenAsync();
+
+                var result = await command.ExecuteScalarAsync();
+
+                return result != null;
             }
         }
     }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MiniPloomes.Data.Dto;
-using MiniPloomes.Data.Model;
 using MiniPloomes.Services;
 
 namespace MiniPloomes.Controllers
@@ -16,7 +15,6 @@ namespace MiniPloomes.Controllers
             _usuarioService = usuarioService;
         }
 
-
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -26,15 +24,27 @@ namespace MiniPloomes.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            return Ok(await _usuarioService.GetById(id));
+            var result = await _usuarioService.GetById(id);
+
+            if (result.IsFailed)
+            {
+                return NotFound();
+            }
+
+            return Ok(result.Value);
         }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateUsuarioDto createUsuarioDto)
         {
-            Usuario result = await _usuarioService.Post(createUsuarioDto);
+            var result = await _usuarioService.Post(createUsuarioDto);
 
-            return CreatedAtAction(nameof(Get), new { result.Id }, result);
+            if (result.IsFailed)
+            {
+                return BadRequest(result.Errors.Select(x => x.Message));
+            }
+
+            return CreatedAtAction(nameof(Get), new { result.Value.Id }, result.Value);
         }
     }
 }

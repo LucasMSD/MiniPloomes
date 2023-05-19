@@ -2,10 +2,8 @@
 
 namespace MiniPloomes.Data.Dto
 {
-    public class CreateUsuarioDto
+    public class LoginDto
     {
-        [Required]
-        public string Nome { get; set; }
         [Required]
         [DataType(DataType.EmailAddress)]
         public string Email { get; set; }

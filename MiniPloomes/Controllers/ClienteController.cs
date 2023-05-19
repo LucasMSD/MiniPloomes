@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MiniPloomes.Data.Dto;
 using MiniPloomes.Data.Model;
 using MiniPloomes.Services;
+using System.Security.Claims;
 
 namespace MiniPloomes.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class ClienteController : ControllerBase
     {
         private readonly ClienteService _clienteService;
@@ -19,34 +22,31 @@ namespace MiniPloomes.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            // pegar o id do usuario pela request
-
-            return Ok(await _clienteService.GetClientesAsync(0));
+            int usuarioId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            return Ok(await _clienteService.GetClientesAsync(usuarioId));
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            // pegar o id do usuario pela request
+            int usuarioId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            var result = await _clienteService.GetClientesByIdAsync(0, 0);
+            var result = await _clienteService.GetClientesByIdAsync(usuarioId, id);
 
-            if (result == null)
+            if (result.IsFailed)
             {
                 return NotFound();
             }
 
-            return Ok(result);
+            return Ok(result.Value);
         }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateClienteDto createCliente)
         {
-            // pegar o id do usuario pela request
-            int usuarioId = 0;
+            int usuarioId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             Cliente result = await _clienteService.PostClienteAsync(createCliente, usuarioId);
-
 
             return CreatedAtAction(nameof(Get), new { result.Id }, result );
         }

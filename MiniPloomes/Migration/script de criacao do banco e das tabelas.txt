@@ -8,8 +8,10 @@ create table Usuario
 Id int identity,
 Nome nvarchar(50) not null,
 Email nvarchar(50) not null,
+Senha nvarchar(50) not null,
 Created datetime not null,
-constraint Pk_Usuario_Id primary key (Id)
+constraint Pk_Usuario_Id primary key (Id),
+constraint UQ_Email unique (email)
 )
 
 create table Cliente
