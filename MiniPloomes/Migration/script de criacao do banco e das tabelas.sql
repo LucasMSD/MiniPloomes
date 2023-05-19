@@ -1,0 +1,23 @@
+﻿create database MiniPloomesDb;
+go
+
+use MiniPloomesDb;
+
+create table Usuario 
+(
+Id int identity,
+Nome nvarchar(50) not null,
+Email nvarchar(50) not null,
+Created datetime not null,
+constraint Pk_Usuario_Id primary key (Id)
+)
+
+create table Cliente
+(
+Id int identity,
+Nome nvarchar(50) not null,
+UsuarioId int not null,
+Created datetime not null,
+constraint Pk_Cliente_Id primary key (Id),
+constraint Fk_Cliente_Usuario_UsuarioId foreign key (UsuarioId) references Usuario (Id)
+)

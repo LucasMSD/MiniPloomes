@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Migration\script de criacao do banco e das tabelas.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Migration\script de criacao do banco e das tabelas.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
   </ItemGroup>
